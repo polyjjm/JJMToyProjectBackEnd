@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.board.boardMapper">
+    <select id="boardSelectList" resultType="com.example.demo.board.boardDTO">
+        SELECT board_no , board_title, board_writer , board_content ,
+               board_hit , board_like , board_hate , board_date ,board_imgList, (SELECT count(*) FROM board) AS totalCount
+        FROM board LIMIT #{limitValue}, 5;
+    </select>
+
+    <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO">
+        INSERT INTO board (board_no, board_title,board_writer,board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
+        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+               <choose>
+                   <when test="board_imgList != null ">#{board_imgList}</when>
+                    <otherwise> null</otherwise>
+               </choose>
+        )
+    </insert>
+</mapper>

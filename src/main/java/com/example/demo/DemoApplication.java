@@ -1,17 +1,16 @@
 package com.example.demo;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class DemoApplication {
-
+    private static final  Logger log = LoggerFactory.getLogger(DemoApplication.class);
     public static void main(String[] args)
     {
-        System.out.println("지금 테스트중입니다 ");
-        System.out.println("주종민 도커 파일 생성중 ");
-        System.out.println("주종민 도커 파일 생성중 2");
-        System.out.println("주종민 도커 파일 생성중 3");
+        log.info("JJM BackEnd Server Start !!! ");
         SpringApplication.run(DemoApplication.class, args);
     }
 
