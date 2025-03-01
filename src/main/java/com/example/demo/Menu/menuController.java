@@ -26,7 +26,7 @@ public class menuController {
 
         Map<String,Object> returnList = new HashMap<>();
 
-        logger.info("추가한값 확인중입니다 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+        logger.info("추가한값 확인중입니다123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         //추후 DB설정시 필요한처리
         List<menuDTO> menuList = new ArrayList<menuDTO>();
         menuList = menuServiceImpl.menuListService();
