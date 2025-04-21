@@ -61,7 +61,7 @@ public class securityConfig {
     @Bean
     public CorsConfigurationSource configurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://3.36.127.136:8020"));
+        configuration.setAllowedOrigins(Arrays.asList("*"));
         //configuration.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
         configuration.setAllowedMethods(Arrays.asList("*")); //모든 HTTP메서드 허용
         configuration.setAllowedHeaders(Arrays.asList("*")); //모든 헤더값 허용
