@@ -62,7 +62,7 @@ public class securityConfig {
     public CorsConfigurationSource configurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
         //configuration.setAllowedOrigins(Arrays.asList("http://3.36.127.136:80"));
-        configuration.setAllowedOrigins(Arrays.asList( "http://3.36.127.136:80" , "http://localhost:3000","http://3.36.127.136:8020" , "http://3.36.127.136:3000","http://jjmdev.co.kr:8020","http://jjmdev.co.kr:8082","http://jjmdev.co.kr:80","http://jjmdev.co.kr:3000","http://3.36.127.136:8082","http://localhost:8082"));
+        configuration.setAllowedOrigins(Arrays.asList( "http://3.36.127.136:80" ,"http://3.36.127.136","http://jjmdev.co.kr", "http://localhost:3000","http://3.36.127.136:8020" , "http://3.36.127.136:3000","http://jjmdev.co.kr:8020","http://jjmdev.co.kr:8082","http://jjmdev.co.kr:80","http://jjmdev.co.kr:3000","http://3.36.127.136:8082","http://localhost:8082","http://3.36.127.136:8000","http://localhost:8000"));
         configuration.setAllowedMethods(Arrays.asList("*")); //모든 HTTP메서드 허용
         configuration.setAllowedHeaders(Arrays.asList("*")); //모든 헤더값 허용
         configuration.setAllowCredentials(true); //자격증명허용
