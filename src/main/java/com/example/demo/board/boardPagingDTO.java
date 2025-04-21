@@ -9,6 +9,8 @@ public class boardPagingDTO {
 
     // 전체 글의 행의 수
     private Integer total;
+
+    private Integer scrollIndex ;
     // 현재 페이지 번호
     private Integer currentPage;
     // 전체 페이지 개수

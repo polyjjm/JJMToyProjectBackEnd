@@ -3,19 +3,16 @@ package com.example.demo.common;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3Client;
 import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.example.demo.board.boardDTO;
+import com.example.demo.board.boardMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +20,10 @@ public class commonServiceImpl implements commonService {
 
     private final AmazonS3 amazonS3;
     private final AmazonS3Client amazonS3Client;
+
+    @Autowired
+    boardMapper boardMapper;
+
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
     @Override
@@ -69,6 +70,33 @@ public class commonServiceImpl implements commonService {
 
         return result;
     }
+
+    @Override
+    public Map<String,Object> search(searchDTO searchDto) throws Exception {
+
+        Map returnMap = new HashMap();
+
+
+        // 검색word ,  검색 타입 있으면 ,  검색 table
+        String tableName = searchDto.getSearchTableName();
+        if(searchDto.getSearchWord() == null){
+
+        }
+        if(searchDto.getSearchTableName() == null){
+
+        }
+
+
+        if(tableName.equals("board")){
+            List<boardDTO> boardDto = new ArrayList<>();
+            boardDto = boardMapper.boardSearch(searchDto);
+            Integer totalCount = boardMapper.boardSearchCount();
+            returnMap.put("searchData" , boardDto);
+            returnMap.put("totalCount" , totalCount);
+        }
+        return returnMap;
+    }
+
     private static String extractString(String input, String marker) {
         int startIndex = input.indexOf(marker);
         if (startIndex != -1) {
@@ -79,4 +107,5 @@ public class commonServiceImpl implements commonService {
             return "";
         }
     }
+
 }

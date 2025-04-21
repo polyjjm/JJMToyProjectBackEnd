@@ -6,7 +6,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class boardServiceImpl implements boardService {
@@ -16,15 +18,16 @@ public class boardServiceImpl implements boardService {
     @Autowired
     commonServiceImpl commonServiceImpl;
     @Override
-    public boardPagingDTO boardSelectList(Integer currentPage) throws Exception {
+    public Map<String,Object> boardSelectList(Integer scrollIndex) throws Exception {
         List<boardDTO> boardList = new ArrayList<>();
-        //boardPagingDTO boardPagingDTO;
 
-        boardList = boardMapper.boardSelectList(currentPage  == 1 ? 0 :  currentPage * 5 / 2);
+        boardList = boardMapper.boardSelectList(scrollIndex);
+        Integer totalCount = boardMapper.boardSearchCount();
+        Map returnMap = new HashMap();
+        returnMap.put("searchData" , boardList);
+        returnMap.put("totalCount" , totalCount);
 
-        boardPagingDTO boardPagingDTO = new boardPagingDTO(boardList.get(0).getTotalCount() , currentPage , 5,5,boardList);
-
-        return boardPagingDTO;
+        return returnMap;
     }
 
     @Override
@@ -79,11 +82,43 @@ public class boardServiceImpl implements boardService {
         }
 
 
+        boardDto.setBoard_writer("주종민");
+
+
+        String imgListText = "";
+        // 이미지 리스트 텍스트로 만들기  "," 추가
+        for(int i = 0 ; i < imgList.size(); i++){
+            imgList.get(i).setValue(
+                    imgList.get(i).getValue().
+                            replace("src=\"" , "").
+                            replace("jpg\"" , "jpg").
+                            replace("png\"" , "png").
+                            replace("gif\"" , "gif").
+                            replace("bmp\"" , "bmp").
+                            replace("tiff\"" , "tiff").
+                            replace("raw\"" , "raw")
+
+            );
+            imgListText  += imgList.get(i).getValue() + ',';
+        }
+//        if(imgListText.endsWith(",")){
+//            imgListText = imgListText.substring(0,imgListText.length() -1);
+//        }
+        boardDto.setBoardImgListText(imgListText);
+
+        boardMapper.boardInsert(boardDto);
+
         return null;
     }
 
     @Override
     public boardDTO boardUdate(boardDTO boardDto, MultipartFile[] files) throws Exception {
         return null;
+    }
+
+    @Override
+    public void boardView(String board_no) throws Exception {
+
+        boardMapper.boardView(board_no);
     }
 }

@@ -2,18 +2,57 @@
 <!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.board.boardMapper">
     <select id="boardSelectList" resultType="com.example.demo.board.boardDTO">
-        SELECT board_no , board_title, board_writer , board_content ,
-               board_hit , board_like , board_hate , board_date ,board_imgList, (SELECT count(*) FROM board) AS totalCount
-        FROM board LIMIT #{limitValue}, 5;
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_changeThumbnail, board_content ,
+               board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag ,(SELECT count(*) FROM board) AS totalCount
+        FROM board LIMIT #{limitValue}, 6
     </select>
 
     <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO">
-        INSERT INTO board (board_no, board_title,board_writer,board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
-        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+        INSERT INTO board (board_no, board_title,board_writer, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList ,board_hashTag)
+        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
                <choose>
-                   <when test="board_imgList != null ">#{board_imgList}</when>
+                   <when test="boardImgListText != null ">#{boardImgListText}</when>
                     <otherwise> null</otherwise>
                </choose>
+                ,
+                <choose>
+                    <when test="board_hashTag != null ">#{board_hashTag}</when>
+                    <otherwise> null</otherwise>
+                </choose>
         )
     </insert>
+
+
+
+    <select id="boardSearch" resultType="com.example.demo.board.boardDTO" parameterType="com.example.demo.common.searchDTO">
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_changeThumbnail, board_content ,
+               board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag
+        FROM board
+        WHERE
+                <if test="searchType.equals('title')  ">
+                    board_title LIKE concat('%' , #{searchWord} , '%')
+                </if>
+                <if test="searchType.equals('hashTag')">
+                    board_hashTag LIKE concat('%#' , #{option}, ',%')
+                    <if test="optionCnt == 2">
+                        AND board_hashTag LIKE concat('%#' , #{option1}, ',%')
+                    </if>
+                    <if test="optionCnt == 3">
+                        AND board_hashTag LIKE concat('%#' , #{option2}, ',%')
+                    </if>
+                </if>
+                <if test="scrollIndex != null">
+                    LIMIT #{scrollIndex}, 6
+                </if>
+
+    </select>
+    <select id="boardSearchCount" resultType="int">
+        SELECT FOUND_ROWS();
+    </select>
+
+    <update id="boardView" parameterType="String">
+        UPDATE board
+        SET board_hit = board.board_hit + 1
+        WHERE board_no =#{board_no};
+    </update>
 </mapper>

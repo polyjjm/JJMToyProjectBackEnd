@@ -1,7 +1,5 @@
 package com.example.demo.board;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
 import lombok.ToString;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -16,6 +14,7 @@ public class boardDTO {
     private String board_title;
     private String board_writer;
     private String board_content;
+    private String board_changeThumbnail;
     private Integer board_hit;
     private Integer board_like;
     private Integer board_hate;
@@ -27,5 +26,7 @@ public class boardDTO {
     private Integer updateNum;
     private List<fileSrcNameDTO> boardImgList;
     private List<fileSrcNameDTO> boardImgLegacyList;
+    private String boardImgListText;
+    private String board_hashTag;
 
 }
