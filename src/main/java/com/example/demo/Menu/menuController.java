@@ -30,7 +30,7 @@ public class menuController {
         Map<String,Object> returnList = new HashMap<>();
 
         logger.info("추가한값 확인중입니다123 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-        logger.info(kakaoRedirectUri , ":::::::::::::::::주종민 uri 확인중");
+        logger.info(kakaoRedirectUri + ":::::::::::::::::주종민 uri 확인중");
         //추후 DB설정시 필요한처리
         List<menuDTO> menuList = new ArrayList<menuDTO>();
         menuList = menuServiceImpl.menuListService();
