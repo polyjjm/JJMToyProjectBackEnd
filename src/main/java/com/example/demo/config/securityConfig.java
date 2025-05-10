@@ -49,7 +49,7 @@ public class securityConfig {
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                특정 url패턴에 대해서는 인증처리(Authentication객체생성) 제외
             .authorizeHttpRequests((auth) -> auth
-                    .requestMatchers(  "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin/**", "/oauth2/**","/auth/**","/board/**").permitAll().anyRequest().authenticated())
+                    .requestMatchers(  "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin", "/oauth2/**","/auth/**","/board/**").permitAll().anyRequest().authenticated())
 //                UsernamePasswordAuthenticationFilter 이 클래스에서 폼로그인 인증을 처리
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
 //                oauth로그인이 성공했을경우 실행할 클래스 정의
@@ -62,7 +62,23 @@ public class securityConfig {
     public CorsConfigurationSource configurationSource(){
         CorsConfiguration configuration = new CorsConfiguration();
         //configuration.setAllowedOrigins(Arrays.asList("http://3.36.127.136:80"));
-        configuration.setAllowedOrigins(Arrays.asList( "http://3.36.127.136:80" ,"http://3.36.127.136","http://jjmdev.co.kr","http://jjmdev.co.kr:8020", "http://localhost:3000","http://3.36.127.136:8020" , "http://3.36.127.136:3000","http://jjmdev.co.kr:8020","http://jjmdev.co.kr:8082","http://jjmdev.co.kr:80","http://jjmdev.co.kr:3000","http://3.36.127.136:8082","http://localhost:8082","http://3.36.127.136:8000","http://localhost:8000"));
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://3.36.127.136:80" ,
+                "http://3.36.127.136",
+                "http://jjmdev.co.kr",
+                "http://jjmdev.co.kr:8020",
+                "http://localhost:3000",
+                "http://3.36.127.136:8020" ,
+                "http://3.36.127.136:3000",
+                "http://jjmdev.co.kr:8020",
+                "http://jjmdev.co.kr:8082",
+                "http://jjmdev.co.kr:80",
+                "http://jjmdev.co.kr:3000",
+                "http://3.36.127.136:8082",
+                "http://localhost:8082",
+                "http://3.36.127.136:8000",
+                "http://localhost:8000"
+        ));
         configuration.setAllowedMethods(Arrays.asList("*")); //모든 HTTP메서드 허용
         configuration.setAllowedHeaders(Arrays.asList("*")); //모든 헤더값 허용
         configuration.setAllowCredentials(true); //자격증명허용
