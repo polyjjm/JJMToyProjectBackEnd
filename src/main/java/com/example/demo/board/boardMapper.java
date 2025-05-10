@@ -19,4 +19,8 @@ public interface boardMapper {
     public Integer boardSearchCount();
 
     public void boardView(String board_no);
+
+    public void boardDelete(Integer board_no);
+
+    public Integer boardUpdate(boardDTO boardDto);
 }

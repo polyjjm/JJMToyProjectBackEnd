@@ -2,14 +2,14 @@
 <!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.board.boardMapper">
     <select id="boardSelectList" resultType="com.example.demo.board.boardDTO">
-        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_changeThumbnail, board_content ,
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer,board_userName, board_changeThumbnail, board_content ,
                board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag ,(SELECT count(*) FROM board) AS totalCount
         FROM board LIMIT #{limitValue}, 6
     </select>
 
     <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO">
-        INSERT INTO board (board_no, board_title,board_writer, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList ,board_hashTag)
-        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+        INSERT INTO board (board_no, board_title,board_writer,board_userName, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList ,board_hashTag)
+        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_userName}, #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
                <choose>
                    <when test="boardImgListText != null ">#{boardImgListText}</when>
                     <otherwise> null</otherwise>
@@ -22,10 +22,12 @@
         )
     </insert>
 
-
+    <delete id="boardDelete" parameterType="Integer">
+        DELETE FROM board WHERE board_no = #{board_no}
+    </delete>
 
     <select id="boardSearch" resultType="com.example.demo.board.boardDTO" parameterType="com.example.demo.common.searchDTO">
-        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_changeThumbnail, board_content ,
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_userName,board_changeThumbnail, board_content ,
                board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag
         FROM board
         WHERE
@@ -54,5 +56,25 @@
         UPDATE board
         SET board_hit = board.board_hit + 1
         WHERE board_no =#{board_no};
+    </update>
+
+    <update id="boardUpdate" parameterType="com.example.demo.board.boardDTO">
+    UPDATE board
+    SET
+    board_title = #{board_title},
+    board_changeThumbnail = #{board_changeThumbnail},
+    board_content = #{board_content},
+    board_hashTag =
+    <choose>
+        <when test="board_hashTag != null">#{board_hashTag}</when>
+        <otherwise>NULL</otherwise>
+    </choose>,
+    board_imgList =
+    <choose>
+        <when test="boardImgListText != null">#{boardImgListText}</when>
+        <otherwise>NULL</otherwise>
+    </choose>,
+    board_date = NOW()
+    WHERE board_no = #{board_no}
     </update>
 </mapper>

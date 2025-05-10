@@ -64,23 +64,24 @@ public class boardController {
 
 
     @PostMapping("/update")
-    public Map<String,Object> boardUpdate (@RequestPart(value="data", required=false) boardDTO boardDto, @RequestPart(value="files", required=true) MultipartFile[] files) throws Exception {
+    public Map<String,Object> boardUpdate (@RequestPart(value="data", required=false) boardDTO boardDto, @RequestPart(value="files", required=false) MultipartFile[] files) throws Exception {
         //추후 DB설정시 필요한처리
         List<boardDTO> boardList = new ArrayList<>();
 
         //이후 DB 저장
-        boardServiceImpl.boardInsert(boardDto , files);
+        boardServiceImpl.boardUdate(boardDto , files);
 
         // 파일 업로드 호출
         Map returnMap = new HashMap();
-        //boardPagingDTO returnboardPagingDTO;
-        //returnboardPagingDTO = boardServiceImpl.boardUpdateList(boardPagingDTO.getCurrentPage());
-        //returnMap.put("data" , returnboardPagingDTO);
 
         logger.info(boardList.toString());
         return returnMap;
     }
+    @PostMapping("/delete")
+    public void boardDelete (@RequestBody boardDTO boardDto) throws Exception {
 
+        boardServiceImpl.boardDelete(boardDto.getBoard_no());
+    }
 
     @PostMapping("/boardSearch")
     public Map<String,Object> boardSearch (@RequestBody searchDTO searchDto)  throws Exception {

@@ -32,7 +32,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(3).toMillis()))
+                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(60).toMillis()))
                 .signWith(SECRET_KEY)
                 .compact();
         return token;
@@ -46,7 +46,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(30).toMillis()))
+                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(30000).toMillis()))
                 .signWith(SECRET_KEY)
                 .compact();
         return token;

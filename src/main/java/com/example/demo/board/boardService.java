@@ -12,4 +12,6 @@ public interface boardService {
     boardDTO boardUdate (boardDTO boardDto , MultipartFile[] files) throws Exception;
 
     void boardView(String board_no) throws Exception;
+
+    void boardDelete(Integer board_no) throws  Exception;
 }

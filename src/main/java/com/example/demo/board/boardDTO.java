@@ -28,5 +28,6 @@ public class boardDTO {
     private List<fileSrcNameDTO> boardImgLegacyList;
     private String boardImgListText;
     private String board_hashTag;
+    private String board_userName;
 
 }

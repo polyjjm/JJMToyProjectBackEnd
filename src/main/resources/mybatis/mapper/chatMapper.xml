@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.chat.chatMessageMapper">
+    <insert id="insertMessage" parameterType="com.example.demo.chat.chatMessage">
+        INSERT INTO chat_message (room_id, sender_id, message, timestamp)
+        VALUES (#{roomId}, #{sender}, #{content}, NOW())
+    </insert>
+
+    <select id="selectMessagesByRoomId" resultType="com.example.demo.chat.chatMessage">
+        SELECT * FROM chat_message
+        WHERE room_id = #{roomId}
+        ORDER BY timestamp ASC
+    </select>
+</mapper>

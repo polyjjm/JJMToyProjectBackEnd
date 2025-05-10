@@ -113,6 +113,53 @@ public class boardServiceImpl implements boardService {
 
     @Override
     public boardDTO boardUdate(boardDTO boardDto, MultipartFile[] files) throws Exception {
+        List<fileSrcNameDTO> imgList = boardDto.getBoardImgList();
+        List<fileSrcNameDTO> imgLegacyList = boardDto.getBoardImgLegacyList();
+        List<fileSrcNameDTO> finalList = new ArrayList<>();
+
+        for (fileSrcNameDTO legacy : imgLegacyList) {
+            for (fileSrcNameDTO img : imgList) {
+                if (img.getValue().contains(legacy.getValue())) {
+                    img.setValue(img.getValue()
+                            .replace("src=\"", "")
+                            .replace("jpg\"", "jpg")
+                            .replace("png\"", "png")
+                            .replace("gif\"", "gif")
+                            .replace("bmp\"", "bmp")
+                            .replace("tiff\"", "tiff")
+                            .replace("raw\"", "raw"));
+                    finalList.add(img);
+                }
+            }
+        }
+
+        for (fileSrcNameDTO legacy : imgLegacyList) {
+            boolean exists = finalList.stream()
+                    .anyMatch(finalImg -> legacy.getValue().contains(finalImg.getValue()));
+            if (!exists) {
+                commonServiceImpl.deleteFile(legacy.getValue().replace("https://jjmserverbucket.s3.ap-northeast-2.amazonaws.com/", ""));
+            }
+        }
+
+        boardDto.setBoard_writer("주종민");
+
+        StringBuilder imgListText = new StringBuilder();
+        for (fileSrcNameDTO img : imgList) {
+            img.setValue(img.getValue()
+                    .replace("src=\"", "")
+                    .replace("jpg\"", "jpg")
+                    .replace("png\"", "png")
+                    .replace("gif\"", "gif")
+                    .replace("bmp\"", "bmp")
+                    .replace("tiff\"", "tiff")
+                    .replace("raw\"", "raw"));
+            imgListText.append(img.getValue()).append(',');
+        }
+
+        boardDto.setBoardImgListText(imgListText.toString());
+
+        boardMapper.boardUpdate(boardDto);
+
         return null;
     }
 
@@ -120,5 +167,10 @@ public class boardServiceImpl implements boardService {
     public void boardView(String board_no) throws Exception {
 
         boardMapper.boardView(board_no);
+    }
+
+    @Override
+    public void boardDelete(Integer board_no) throws Exception {
+        boardMapper.boardDelete(board_no);
     }
 }
