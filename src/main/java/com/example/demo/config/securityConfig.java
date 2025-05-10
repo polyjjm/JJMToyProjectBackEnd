@@ -49,7 +49,7 @@ public class securityConfig {
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                특정 url패턴에 대해서는 인증처리(Authentication객체생성) 제외
             .authorizeHttpRequests((auth) -> auth
-                    .requestMatchers(  "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin", "/oauth2/**","/auth/**","/board/**").permitAll().anyRequest().authenticated())
+                    .requestMatchers(  "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin","/member/kakao/doLogin/**" ,"/oauth2/**","/auth/**","/board/**").permitAll().anyRequest().authenticated())
 //                UsernamePasswordAuthenticationFilter 이 클래스에서 폼로그인 인증을 처리
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
 //                oauth로그인이 성공했을경우 실행할 클래스 정의
