@@ -84,11 +84,13 @@ public class MemberController {
         //Member originalMember = memberService.getMemberBySocialId(kakaoProfileDto.getId());
         userDTO originalMember = new userDTO();
         originalMember =  userMapper.selectRefreshToken(kakaoProfileDto.getId());
-        String refreschToken = jwtTokenProvider.refreshToken(originalMember.getUser_email(), originalMember.getRole().toString());
+
 
         if(originalMember == null){
+            String  refreschToken = jwtTokenProvider.refreshToken(kakaoProfileDto.getId(), "USER");
             userMapper.insertKakao(kakaoProfileDto.getId(),"1" ,"kakao" ,kakaoProfileDto.getKakao_account().getGender() ,kakaoProfileDto.getKakao_account().getProfile().getNickname() , kakaoProfileDto.getKakao_account().getEmail(),"USER" ,refreschToken);
         }else {
+            String refreschToken = jwtTokenProvider.refreshToken(originalMember.getUser_email(), originalMember.getRole().toString());
             //update
             //재로그인시 토큰 시간 만료면 다시발급
             // 그전에 리프레쉬 유효기간 확인해야함
