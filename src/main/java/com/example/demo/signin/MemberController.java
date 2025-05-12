@@ -108,6 +108,14 @@ public class MemberController {
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }
 
+    @PostMapping("/userList")
+    public Map<String,Object> memboerList(){
+        Map returnMap = new HashMap();
+        //userMapper.userList();
+        returnMap.put("data" , userMapper.userList());
+        return returnMap;
+    }
+
 
 //    @PostMapping("/logout")
 //    public ResponseEntity<?> logout(String accessToken ,String email){

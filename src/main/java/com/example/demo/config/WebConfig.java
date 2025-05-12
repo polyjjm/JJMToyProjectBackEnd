@@ -15,9 +15,10 @@ public class WebConfig implements WebMvcConfigurer {
                 //.allowedOrigins("http://localhost:8020","http://localhost:8082","http://3.36.127.136:8082", "http://3.36.127.136:80" , "http://3.36.127.136:8020" , "http://localhost:80" ,"http://localhost:3000" , "http://3.36.127.136:3000")
                 .allowedOriginPatterns("*")
                 //.allowedOrigins("*")
-                .allowedMethods("GET", "POST", "PUT", "DELETE")
+                .allowedMethods("GET", "POST", "PUT", "DELETE","OPTIONS")
                 .allowedHeaders("Authorization", "Content-Type")
-                .exposedHeaders("Custom-Header")
+                .allowedHeaders("*") // ✅ 모든 헤더 허용
+                .exposedHeaders("*")
                 .allowCredentials(true)
                 .maxAge(3600);
     }

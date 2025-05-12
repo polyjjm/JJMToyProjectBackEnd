@@ -11,4 +11,61 @@
         WHERE room_id = #{roomId}
         ORDER BY timestamp ASC
     </select>
+
+    <select id="isMemberOfRoom" resultType="boolean">
+        SELECT COUNT(*) > 0
+        FROM chat_room_member
+        WHERE user_id = #{userId}
+          AND room_id = #{roomId}
+    </select>
+
+    <insert id="insertChatRoom">
+        INSERT INTO chat_room (is_group)
+        VALUES (#{isGroup});
+    </insert>
+
+    <select id="getLastInsertId" resultType="long">
+        SELECT LAST_INSERT_ID();
+    </select>
+
+    <insert id="insertChatRoomMember">
+        INSERT INTO chat_room_member (room_id, user_id)
+        VALUES (#{roomId}, #{userId});
+    </insert>
+
+    <select id="findExistingOneToOneRoom" resultType="long">
+        SELECT cr.room_id
+        FROM chat_room cr
+                 JOIN chat_room_member m1 ON cr.room_id = m1.room_id
+                 JOIN chat_room_member m2 ON cr.room_id = m2.room_id
+        WHERE cr.is_group = false
+          AND m1.user_id = #{user1}
+          AND m2.user_id = #{user2}
+        GROUP BY cr.room_id
+        HAVING COUNT(*) = 2
+    </select>
+
+    <select id="selectRoomsByUser" resultType="com.example.demo.chat.ChatRoomDto">
+        SELECT
+            cr.room_id,
+            cr.is_group,
+            (
+                SELECT message
+                FROM chat_message
+                WHERE room_id = cr.room_id
+                ORDER BY timestamp DESC
+                LIMIT 1
+                ) AS lastMessage,
+            (
+        SELECT timestamp
+        FROM chat_message
+        WHERE room_id = cr.room_id
+        ORDER BY timestamp DESC
+            LIMIT 1
+            ) AS lastMessageTime
+        FROM chat_room cr
+            JOIN chat_room_member m ON cr.room_id = m.room_id
+        WHERE m.user_id = #{userId}
+        ORDER BY lastMessageTime DESC
+    </select>
 </mapper>

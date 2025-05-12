@@ -26,4 +26,8 @@
         SET user_refresh =#{user_refresch}
         WHERE user_id=#{user_id};
     </update>
+
+    <select id="userList" resultType="com.example.demo.signin.userDTO">
+        SELECT user_id , user_name , user_email FROM member_user;
+    </select>
 </mapper>

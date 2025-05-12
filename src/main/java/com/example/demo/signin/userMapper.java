@@ -18,4 +18,6 @@ public interface userMapper {
     public userDTO selectRefreshToken(String user_id);
 
     public void updateRefreshToken(String user_id , String user_refresch);
+
+    public List<userDTO> userList();
 }
