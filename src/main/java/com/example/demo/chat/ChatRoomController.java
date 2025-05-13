@@ -35,4 +35,13 @@ public class ChatRoomController {
         returnMap.put("data" , chatMapper.selectRoomsByUser(userId));
         return returnMap;
     }
+    @PostMapping("/joinGuestRoom")
+    public Map<String,Object> joinGuestRoom(@RequestBody Map<String, String> request) {
+        String guestId = request.get("guestId");
+        Long roomId = chatService.joinOrCreateGuestGroupRoom(guestId);
+
+        Map returnMap = new HashMap();
+        returnMap.put("data" , roomId);
+        return returnMap;
+    }
 }

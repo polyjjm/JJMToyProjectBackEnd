@@ -13,12 +13,15 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.security.Principal;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
 public class chatController {
     private final chatMessageMapper messageMapper;
+    private final ChatService chatService;
 
     @MessageMapping("/chat.send/{roomId}")
     @SendTo("/topic/{roomId}")
@@ -43,5 +46,7 @@ public class chatController {
         messageMapper.markMessagesAsRead(roomId, userId); // ✅ 읽음 처리 먼저
         return ResponseEntity.ok(messageMapper.selectMessagesByRoomId(roomId));
     }
+
+
 
 }

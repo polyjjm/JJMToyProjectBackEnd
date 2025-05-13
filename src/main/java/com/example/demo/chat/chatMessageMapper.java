@@ -22,5 +22,13 @@ public interface chatMessageMapper {
 
     void markMessagesAsRead(@Param("roomId") Long roomId, @Param("userId") String userId);
 
+    // 1. '게스트 그룹채팅방'이 존재하는지 찾기
+    Long findGuestGroupRoomId();
+
+    // 2. 새로운 그룹 채팅방 생성
+    void insertGroupRoom();
+
+
+
 
 }

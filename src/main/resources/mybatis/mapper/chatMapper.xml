@@ -76,4 +76,14 @@
           AND sender_id != #{userId}
           AND is_read = FALSE
     </update>
+
+
+    <select id="findGuestGroupRoomId" resultType="long">
+        SELECT room_id FROM chat_room WHERE is_group = true AND room_name = 'guest_group' LIMIT 1
+    </select>
+
+
+    <insert id="insertGroupRoom">
+        INSERT INTO chat_room (is_group, room_name) VALUES (true, 'guest_group')
+    </insert>
 </mapper>
