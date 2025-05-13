@@ -20,5 +20,7 @@ public interface chatMessageMapper {
 
     List<ChatRoomDto> selectRoomsByUser(@Param("userId") String userId);
 
+    void markMessagesAsRead(@Param("roomId") Long roomId, @Param("userId") String userId);
+
 
 }

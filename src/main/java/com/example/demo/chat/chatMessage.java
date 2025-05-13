@@ -1,6 +1,7 @@
 package com.example.demo.chat;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -13,5 +14,7 @@ public class chatMessage {
     private String sender;
     private String content;
     private LocalDateTime timestamp;
+    @JsonProperty("is_read")
+    private Boolean is_read;
 
 }

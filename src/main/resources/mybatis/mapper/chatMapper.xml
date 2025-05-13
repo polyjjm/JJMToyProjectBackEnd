@@ -68,4 +68,12 @@
         WHERE m.user_id = #{userId}
         ORDER BY lastMessageTime DESC
     </select>
+
+    <update id="markMessagesAsRead">
+        UPDATE chat_message
+        SET is_read = TRUE
+        WHERE room_id = #{roomId}
+          AND sender_id != #{userId}
+          AND is_read = FALSE
+    </update>
 </mapper>

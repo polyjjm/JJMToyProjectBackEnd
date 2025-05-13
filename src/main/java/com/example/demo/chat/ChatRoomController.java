@@ -22,8 +22,9 @@ public class ChatRoomController {
 
     @PostMapping("/createRoom")
     public ResponseEntity<Long> createRoom(@RequestBody ChatRoomRequest request) {
-        Long roomId = chatService.createRoom(request.getMemberIds(), request.isGroup());
+        Long roomId = chatService.createRoom(request.getMemberIds(), request.getIsGroup());
         return ResponseEntity.ok(roomId);
+
     }
 
     @PostMapping("/rooms")

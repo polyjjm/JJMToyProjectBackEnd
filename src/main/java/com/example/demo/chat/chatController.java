@@ -40,6 +40,7 @@ public class chatController {
         if (!messageMapper.isMemberOfRoom(userId, roomId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("접근 권한이 없습니다.");
         }
+        messageMapper.markMessagesAsRead(roomId, userId); // ✅ 읽음 처리 먼저
         return ResponseEntity.ok(messageMapper.selectMessagesByRoomId(roomId));
     }
 
