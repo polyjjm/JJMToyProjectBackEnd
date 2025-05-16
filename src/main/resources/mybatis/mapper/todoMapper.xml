@@ -24,7 +24,6 @@
 
     <!-- ✅ 할 일 수정 -->
     <update id="updateTodo">
-        <bind name="fieldsClause" value="@org.apache.ibatis.scripting.xmltags.Ognl@join(fields.keySet(), ',')"/>
         UPDATE todo
         <set>
             <if test="fields.text != null">text = #{fields.text},</if>
