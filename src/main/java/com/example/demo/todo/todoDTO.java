@@ -15,4 +15,5 @@ public class todoDTO {
     private String date; // YYYY-MM-DD 형식
     private String category;
     private String icon;
+    private String user_id;
 }

@@ -19,7 +19,7 @@
     <!-- ✅ 할 일 추가 -->
     <insert id="insertTodo" parameterType="com.example.demo.todo.todoDTO">
         INSERT INTO todo (id, text, completed, important, date, category, icon, user_id)
-        VALUES (#{id}, #{text}, #{completed}, #{important}, #{date}, #{category}, #{icon}, #{userId})
+        VALUES (#{id}, #{text}, #{completed}, #{important}, #{date}, #{category}, #{icon}, #{user_id})
     </insert>
 
     <!-- ✅ 할 일 수정 -->
