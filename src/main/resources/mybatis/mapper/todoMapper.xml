@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.demo.todo.todoMapper">
+    <!-- ✅ 날짜별 할 일 조회 -->
+    <select id="selectByDate" parameterType="String" resultType="com.example.demo.todo.todoDTO">
+        SELECT * FROM todo
+        WHERE date = #{date} AND user_id = #{userId}
+        ORDER BY important DESC, id DESC
+    </select>
+    <!-- ✅ 전체 할 일 조회 -->
+    <select id="selectAll" resultType="com.example.demo.todo.todoDTO">
+        SELECT * FROM todo
+        WHERE user_id = #{userId}
+        ORDER BY date DESC, important DESC, id DESC
+    </select>
+    <!-- ✅ 할 일 추가 -->
+    <insert id="insertTodo" parameterType="com.example.demo.todo.todoDTO">
+        INSERT INTO todo (id, text, completed, important, date, category, icon, user_id)
+        VALUES (#{id}, #{text}, #{completed}, #{important}, #{date}, #{category}, #{icon}, #{userId})
+    </insert>
+
+    <!-- ✅ 할 일 수정 -->
+    <update id="updateTodo">
+        <bind name="fieldsClause" value="@org.apache.ibatis.scripting.xmltags.Ognl@join(fields.keySet(), ',')"/>
+        UPDATE todo
+        <set>
+            <if test="fields.text != null">text = #{fields.text},</if>
+            <if test="fields.completed != null">completed = #{fields.completed},</if>
+            <if test="fields.important != null">important = #{fields.important},</if>
+            <if test="fields.category != null">category = #{fields.category},</if>
+            <if test="fields.icon != null">icon = #{fields.icon},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+
+    <!-- ✅ 할 일 삭제 -->
+    <delete id="deleteTodo">
+        DELETE FROM todo WHERE id = #{id}
+    </delete>
+
+</mapper>
