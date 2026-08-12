@@ -1,5 +1,9 @@
 HELP.md
 target/
+
+### Local/prod datasource credentials (not shared) ###
+application-local.properties
+application-prod.properties
 !.mvn/wrapper/maven-wrapper.jar
 !**/src/main/**/target/
 !**/src/test/**/target/

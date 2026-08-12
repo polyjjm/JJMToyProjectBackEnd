@@ -30,39 +30,22 @@ public class AuthController {
     private static final Logger logger = LoggerFactory.getLogger(menuController.class);
     @PostMapping("/reissue")
     public ResponseEntity<?> reissue (@RequestBody userDTO userDto){
-        // 처리해야할것
-        /*
-        * 일단은 리이슈를 탔다는것이 토큰이 만료된것임
-        * 해당아이디로 DB 조회후 리프레쉬 토큰가져옴
-        * 가져온 리프레쉬 토큰이 유효한 토큰인지 확인 (시간 남았는지 )
-        * 토큰이 유효하다면 토큰 재발급 해서 다시 보내줌
-        * 리프레쉬 토큰도 유효하지않다면 DB 삭제하고 로그아웃처리 재로그인
-        *
-        * */
-        userDTO returnUserDto = new userDTO();
-        returnUserDto = userMapper.selectRefreshToken(userDto.getUser_id());
+        // 일단은 리이슈를 탔다는것이 토큰이 만료된것임
+        // 해당아이디로 DB 조회후 리프레쉬 토큰가져옴, 유효하면 재발급, 아니면(유저 없음/만료) 401로 재로그인 유도
+        userDTO returnUserDto = userMapper.selectRefreshToken(userDto.getUser_id());
 
-        try {
-            if (jwtTokenProvider.validateToken(returnUserDto.getUser_refresh())) {
-                //여기서 jwt 토큰 재발급
-                String jwtToken = jwtTokenProvider.createToken(returnUserDto.getUser_email(), returnUserDto.getRole().toString());
-
-                Map<String, Object> loginInfo = new HashMap<>();
-                loginInfo.put("id", returnUserDto.getUser_id());
-                loginInfo.put("token", jwtToken);
-                return new ResponseEntity<>(loginInfo, HttpStatus.OK);
-            } else {
-                //리프레쉬도 만료면 그냥 로그아웃
-                throw new RuntimeException("Invalid refresh token");
-            }
-        }catch (Exception e){
+        if (returnUserDto == null || !jwtTokenProvider.validateToken(returnUserDto.getUser_refresh())) {
+            logger.info("reissue failed for user_id={} (not found or refresh token invalid)", userDto.getUser_id());
             Map<String, Object> loginInfo = new HashMap<>();
             loginInfo.put("code", "101");
-            logger.info(e.toString());
-            return new ResponseEntity<>(loginInfo, HttpStatus.OK);
-
+            return new ResponseEntity<>(loginInfo, HttpStatus.UNAUTHORIZED);
         }
 
+        String jwtToken = jwtTokenProvider.createToken(returnUserDto.getUser_email(), returnUserDto.getRole().toString());
+        Map<String, Object> loginInfo = new HashMap<>();
+        loginInfo.put("id", returnUserDto.getUser_id());
+        loginInfo.put("token", jwtToken);
+        return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }
 
 }

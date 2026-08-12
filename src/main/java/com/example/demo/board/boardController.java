@@ -78,9 +78,14 @@ public class boardController {
         return returnMap;
     }
     @PostMapping("/delete")
-    public void boardDelete (@RequestBody boardDTO boardDto) throws Exception {
+    public Map<String,Object> boardDelete (@RequestBody boardDTO boardDto) throws Exception {
 
         boardServiceImpl.boardDelete(boardDto.getBoard_no());
+
+        // post() (frontend) unwraps a top-level "data" key from every response - see common.tsx
+        Map<String,Object> returnMap = new HashMap<>();
+        returnMap.put("data", true);
+        return returnMap;
     }
 
     @PostMapping("/boardSearch")

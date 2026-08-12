@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -15,13 +17,19 @@ import java.util.Optional;
 
 @Component
 public class JwtTokenProvider {
+    private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
+
     private final String secretKey;
-    private final int expiration;
+    private final int expirationMinutes;
+    private final int refreshExpirationMinutes;
     private Key SECRET_KEY;
 
-    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey, @Value("${jwt.expiration}") int expiration) {
+    public JwtTokenProvider(@Value("${jwt.secret}") String secretKey,
+                             @Value("${jwt.expiration}") int expirationMinutes,
+                             @Value("${jwt.refresh-expiration}") int refreshExpirationMinutes) {
         this.secretKey = secretKey;
-        this.expiration = expiration;
+        this.expirationMinutes = expirationMinutes;
+        this.refreshExpirationMinutes = refreshExpirationMinutes;
         this.SECRET_KEY = new SecretKeySpec(java.util.Base64.getDecoder().decode(secretKey), SignatureAlgorithm.HS512.getJcaName());
     }
     public String createToken(String email, String role){
@@ -32,7 +40,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(60).toMillis()))
+                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(expirationMinutes).toMillis()))
                 .signWith(SECRET_KEY)
                 .compact();
         return token;
@@ -46,7 +54,7 @@ public class JwtTokenProvider {
         String token = Jwts.builder()
                 .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(30000).toMillis()))
+                .setExpiration(new Date(now.getTime()+ Duration.ofMinutes(refreshExpirationMinutes).toMillis()))
                 .signWith(SECRET_KEY)
                 .compact();
         return token;
@@ -73,6 +81,7 @@ public class JwtTokenProvider {
                     .getBody();
             return Optional.of(claims);
         } catch (JwtException | IllegalArgumentException e) {
+            logger.debug("JWT validation failed: {}", e.toString());
             return Optional.empty();
         }
     }

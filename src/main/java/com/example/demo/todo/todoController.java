@@ -32,19 +32,29 @@ public class todoController {
     }
     // ✅ POST - 새 할 일 추가
     @PostMapping
-    public void addTodo(@RequestBody todoDTO todo) {
+    public Map<String, Object> addTodo(@RequestBody todoDTO todo) {
         todoService.addTodo(todo);
+        return successResult();
     }
 
     // ✅ POST - 특정 할 일 수정
     @PostMapping("/{id}")
-    public void updateTodo(@PathVariable Long id, @RequestBody Map<String, Object> updateFields) {
+    public Map<String, Object> updateTodo(@PathVariable Long id, @RequestBody Map<String, Object> updateFields) {
         todoService.updateTodo(id, updateFields);
+        return successResult();
     }
 
     // ✅ POST - 특정 할 일 삭제
     @PostMapping("/delete/{id}")
-    public void deleteTodo(@PathVariable Long id) {
+    public Map<String, Object> deleteTodo(@PathVariable Long id) {
         todoService.deleteTodo(id);
+        return successResult();
+    }
+
+    // post() (frontend) unwraps a top-level "data" key from every response - see common.tsx
+    private Map<String, Object> successResult() {
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("data", true);
+        return returnMap;
     }
 }

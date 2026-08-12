@@ -18,12 +18,16 @@ public class KakaoService {
 
 
     public AccessTokenDTO getAccessToken(String code){
+        return getAccessToken(code, kakaoRedirectUri);
+    }
+
+    public AccessTokenDTO getAccessToken(String code, String redirectUri){
         RestClient restClient = RestClient.create();
 
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("code", code);
         params.add("client_id", kakaoClientId);
-        params.add("redirect_uri", kakaoRedirectUri);
+        params.add("redirect_uri", redirectUri != null ? redirectUri : kakaoRedirectUri);
         params.add("grant_type", "authorization_code");
 
         ResponseEntity<AccessTokenDTO> response =  restClient.post()

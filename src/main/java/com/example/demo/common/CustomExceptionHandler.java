@@ -1,5 +1,7 @@
 package com.example.demo.common;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -9,14 +11,16 @@ import java.util.Map;
 @RestControllerAdvice
 public class CustomExceptionHandler {
     @ExceptionHandler(value = CustomException.class)
-    protected Map<String,Object> handleCustomException(CustomException e) {
-        System.out.println("??");
-        ErrorCode errorMessage = ErrorCode.ACCESS_TOKEN_EXPIRED;
+    protected ResponseEntity<Map<String,Object>> handleCustomException(CustomException e) {
+        ErrorCode errorMessage = e.getErrorMessage();
 
         Map<String,Object> resutMap = new HashMap<>();
-        resutMap.put("errorMessage" , errorMessage.toString());
-        resutMap.put("errorCode" , "402");
-        return resutMap;
-        //return null;
+        resutMap.put("errorMessage" , errorMessage.getErrorMessage());
+        resutMap.put("errorCode" , errorMessage.getErrorCode());
+
+        HttpStatus status = errorMessage == ErrorCode.MEMBER_PHONE_EXIST
+                ? HttpStatus.CONFLICT
+                : HttpStatus.UNAUTHORIZED;
+        return new ResponseEntity<>(resutMap, status);
     }
 }

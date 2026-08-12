@@ -79,7 +79,7 @@ public class MemberController {
 
     @PostMapping("/kakao/doLogin")
     public ResponseEntity<?> kakaoLogin(@RequestBody RedirectDTO redirectDto){
-        AccessTokenDTO accessTokenDto = kakaoService.getAccessToken(redirectDto.getCode());
+        AccessTokenDTO accessTokenDto = kakaoService.getAccessToken(redirectDto.getCode(), redirectDto.getRedirectUri());
         KakaoProfileDTO kakaoProfileDto  = kakaoService.getKakaoProfile(accessTokenDto.getAccess_token());
         //Member originalMember = memberService.getMemberBySocialId(kakaoProfileDto.getId());
         userDTO originalMember = new userDTO();
@@ -87,8 +87,10 @@ public class MemberController {
 
 
         if(originalMember == null){
-            String  refreschToken = jwtTokenProvider.refreshToken(kakaoProfileDto.getId(), "USER");
+            String  refreschToken = jwtTokenProvider.refreshToken(kakaoProfileDto.getKakao_account().getEmail(), "USER");
             userMapper.insertKakao(kakaoProfileDto.getId(),"1" ,"kakao" ,kakaoProfileDto.getKakao_account().getGender() ,kakaoProfileDto.getKakao_account().getProfile().getNickname() , kakaoProfileDto.getKakao_account().getEmail(),"USER" ,refreschToken);
+            // re-fetch: originalMember was null (new user), and createToken()/loginInfo below need the persisted row
+            originalMember = userMapper.selectRefreshToken(kakaoProfileDto.getId());
         }else {
             String refreschToken = jwtTokenProvider.refreshToken(originalMember.getUser_email(), originalMember.getRole().toString());
             //update
