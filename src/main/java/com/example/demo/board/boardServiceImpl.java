@@ -173,4 +173,9 @@ public class boardServiceImpl implements boardService {
     public void boardDelete(Integer board_no) throws Exception {
         boardMapper.boardDelete(board_no);
     }
+
+    @Override
+    public List<boardCategoryCountDTO> boardCategoryTree() throws Exception {
+        return boardMapper.boardCategoryTree();
+    }
 }

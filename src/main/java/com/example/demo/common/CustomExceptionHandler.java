@@ -18,9 +18,14 @@ public class CustomExceptionHandler {
         resutMap.put("errorMessage" , errorMessage.getErrorMessage());
         resutMap.put("errorCode" , errorMessage.getErrorCode());
 
-        HttpStatus status = errorMessage == ErrorCode.MEMBER_PHONE_EXIST
-                ? HttpStatus.CONFLICT
-                : HttpStatus.UNAUTHORIZED;
+        // Most existing error codes are auth/token related (401), so that's the default.
+        // Added explicit cases as new non-401 codes were introduced rather than keeping
+        // the old binary "MEMBER_PHONE_EXIST vs everything else" check.
+        HttpStatus status = switch (errorMessage) {
+            case MEMBER_PHONE_EXIST -> HttpStatus.CONFLICT;
+            case COMMENT_FORBIDDEN -> HttpStatus.FORBIDDEN;
+            default -> HttpStatus.UNAUTHORIZED;
+        };
         return new ResponseEntity<>(resutMap, status);
     }
 }

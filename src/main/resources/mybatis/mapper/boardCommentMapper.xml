@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.board.boardCommentMapper">
+    <select id="selectByBoardNo" resultType="com.example.demo.board.boardCommentDTO">
+        SELECT comment_no, board_no, comment_userName, comment_content, comment_date
+        FROM board_comment
+        WHERE board_no = #{board_no}
+        ORDER BY comment_no ASC
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.board.boardCommentDTO"
+            useGeneratedKeys="true" keyProperty="comment_no">
+        INSERT INTO board_comment (board_no, comment_userName, comment_content, comment_date)
+        VALUES (#{board_no}, #{comment_userName}, #{comment_content}, NOW())
+    </insert>
+
+    <!-- Used by boardCommentServiceImpl to verify the requester owns the comment before deleting it. -->
+    <select id="selectAuthor" resultType="String">
+        SELECT comment_userName FROM board_comment WHERE comment_no = #{comment_no}
+    </select>
+
+    <delete id="delete">
+        DELETE FROM board_comment WHERE comment_no = #{comment_no}
+    </delete>
+</mapper>

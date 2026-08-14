@@ -2,23 +2,36 @@
 <!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.board.boardMapper">
     <select id="boardSelectList" resultType="com.example.demo.board.boardDTO">
-        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer,board_userName, board_changeThumbnail, board_content ,
-               board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag ,(SELECT count(*) FROM board) AS totalCount
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer,board_userName,
+               board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content ,
+               board_hit , board_like , board_hate , board_date ,board_imgList,
+               (SELECT COUNT(*) FROM board_comment c WHERE c.board_no = board.board_no) AS commentCount,
+               (SELECT count(*) FROM board) AS totalCount
         FROM board LIMIT #{limitValue}, 6
     </select>
 
     <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO">
-        INSERT INTO board (board_no, board_title,board_writer,board_userName, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList ,board_hashTag)
-        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_userName}, #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+        INSERT INTO board (board_no, board_title,board_writer,board_userName, board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
+        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_userName},
+               <choose>
+                   <when test="board_categoryMain != null">#{board_categoryMain}</when>
+                   <otherwise> NULL</otherwise>
+               </choose>
+                ,
+               <choose>
+                   <when test="board_categoryMid != null">#{board_categoryMid}</when>
+                   <otherwise> NULL</otherwise>
+               </choose>
+                ,
+               <choose>
+                   <when test="board_categorySub != null">#{board_categorySub}</when>
+                   <otherwise> NULL</otherwise>
+               </choose>
+                , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
                <choose>
                    <when test="boardImgListText != null ">#{boardImgListText}</when>
                     <otherwise> null</otherwise>
                </choose>
-                ,
-                <choose>
-                    <when test="board_hashTag != null ">#{board_hashTag}</when>
-                    <otherwise> null</otherwise>
-                </choose>
         )
     </insert>
 
@@ -26,30 +39,72 @@
         DELETE FROM board WHERE board_no = #{board_no}
     </delete>
 
+    <!--
+        게시글 검색/필터.
+        검색어(searchWord + searchScope: title/content/그 외=제목+내용)와
+        3단계 카테고리 필터(categoryMain/Mid/Sub)는 서로 배타적이지 않고 동시에 적용된다 -
+        예: "개발" 대분류 안에서 "MUI"를 검색하는 경우처럼 함께 쓰인다.
+        카테고리는 정확히 일치(=)로 비교한다 - 해시태그 시절의 LIKE 매칭과 달리 사용자가
+        직접 입력한 값 그대로 필터링해야 하고(부분일치는 다른 카테고리를 오염시킴),
+        검색어는 여전히 부분일치(LIKE)로 찾는다.
+        <where> 태그가 앞의 불필요한 AND/OR을 알아서 제거해주므로, 각 조건은 검색어/카테고리가
+        실제로 넘어왔을 때만 독립적으로 추가된다("전체" 선택 = 프론트에서 해당 파라미터를 아예 보내지 않음).
+    -->
     <select id="boardSearch" resultType="com.example.demo.board.boardDTO" parameterType="com.example.demo.common.searchDTO">
-        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_userName,board_changeThumbnail, board_content ,
-               board_hit , board_like , board_hate , board_date ,board_imgList,board_hashTag
+        SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_userName,
+               board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content ,
+               board_hit , board_like , board_hate , board_date ,board_imgList,
+               (SELECT COUNT(*) FROM board_comment c WHERE c.board_no = board.board_no) AS commentCount
         FROM board
-        WHERE
-                <if test="searchType.equals('title')  ">
-                    board_title LIKE concat('%' , #{searchWord} , '%')
-                </if>
-                <if test="searchType.equals('hashTag')">
-                    board_hashTag LIKE concat('%#' , #{option}, ',%')
-                    <if test="optionCnt == 2">
-                        AND board_hashTag LIKE concat('%#' , #{option1}, ',%')
-                    </if>
-                    <if test="optionCnt == 3">
-                        AND board_hashTag LIKE concat('%#' , #{option2}, ',%')
-                    </if>
-                </if>
-                <if test="scrollIndex != null">
-                    LIMIT #{scrollIndex}, 6
-                </if>
+        <where>
+            <if test="searchWord != null and searchWord != ''">
+                <choose>
+                    <when test="searchScope == 'title'">
+                        AND board_title LIKE concat('%' , #{searchWord} , '%')
+                    </when>
+                    <when test="searchScope == 'content'">
+                        AND board_content LIKE concat('%' , #{searchWord} , '%')
+                    </when>
+                    <otherwise>
+                        <!-- default scope, incl. 'titleContent': 제목 OR 내용 -->
+                        AND (board_title LIKE concat('%' , #{searchWord} , '%') OR board_content LIKE concat('%' , #{searchWord} , '%'))
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="categoryMain != null and categoryMain != ''">
+                AND board_categoryMain = #{categoryMain}
+            </if>
+            <if test="categoryMid != null and categoryMid != ''">
+                AND board_categoryMid = #{categoryMid}
+            </if>
+            <if test="categorySub != null and categorySub != ''">
+                AND board_categorySub = #{categorySub}
+            </if>
+        </where>
+        <if test="scrollIndex != null">
+            LIMIT #{scrollIndex}, 6
+        </if>
 
     </select>
     <select id="boardSearchCount" resultType="int">
         SELECT FOUND_ROWS();
+    </select>
+
+    <!--
+        대/중/소 3단계 조합별 게시글 수를 한 번의 쿼리로 전부 집계해서 반환한다.
+        프론트엔드는 이 트리 하나로 3단계 탭(대분류 → 중분류 → 소분류) 목록과 개수를
+        전부 파생시키고, 사용자가 단계를 좁혀갈 때마다 API를 추가로 호출하지 않는다
+        (요구사항: 카테고리 목록을 프론트에 하드코딩하지 말 것).
+        데이터 규모가 커지면 전체 조합을 한 번에 반환하는 대신 단계별로 별도 조회하는
+        방식으로 바꾸는 것을 고려할 것 - 지금은(개인 블로그 규모) 단순함이 더 낫다고 판단.
+    -->
+    <select id="boardCategoryTree" resultType="com.example.demo.board.boardCategoryCountDTO">
+        SELECT board_categoryMain AS categoryMain,
+               board_categoryMid AS categoryMid,
+               board_categorySub AS categorySub,
+               COUNT(*) AS count
+        FROM board
+        GROUP BY board_categoryMain, board_categoryMid, board_categorySub
     </select>
 
     <update id="boardView" parameterType="String">
@@ -64,9 +119,19 @@
     board_title = #{board_title},
     board_changeThumbnail = #{board_changeThumbnail},
     board_content = #{board_content},
-    board_hashTag =
+    board_categoryMain =
     <choose>
-        <when test="board_hashTag != null">#{board_hashTag}</when>
+        <when test="board_categoryMain != null">#{board_categoryMain}</when>
+        <otherwise>NULL</otherwise>
+    </choose>,
+    board_categoryMid =
+    <choose>
+        <when test="board_categoryMid != null">#{board_categoryMid}</when>
+        <otherwise>NULL</otherwise>
+    </choose>,
+    board_categorySub =
+    <choose>
+        <when test="board_categorySub != null">#{board_categorySub}</when>
         <otherwise>NULL</otherwise>
     </choose>,
     board_imgList =

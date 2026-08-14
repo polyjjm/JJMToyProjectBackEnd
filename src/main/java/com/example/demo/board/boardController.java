@@ -1,7 +1,5 @@
 package com.example.demo.board;
 
-import com.example.demo.common.CustomException;
-import com.example.demo.common.ErrorCode;
 import com.example.demo.common.commonServiceImpl;
 import com.example.demo.common.searchDTO;
 import org.slf4j.Logger;
@@ -88,57 +86,28 @@ public class boardController {
         return returnMap;
     }
 
+    // Board search/filter: combines free-text search (searchWord + searchScope) with the
+    // 3-tier category filter (categoryMain/Mid/Sub). Unlike the old hashtag scheme, category
+    // values arrive on searchDto already shaped for the mapper's exact-match <if> blocks, so
+    // there's no string-splitting to do here anymore - the controller is a thin pass-through.
     @PostMapping("/boardSearch")
     public Map<String,Object> boardSearch (@RequestBody searchDTO searchDto)  throws Exception {
-        //추후 DB설정시 필요한처리
-        boardDTO boardDto = new boardDTO();
-        if(searchDto.getSearchType().equals("hashTag")){
-            String[] hashList;
-            if(searchDto.getSearchWord().substring(searchDto.getSearchWord().length() -1).equals(",")){
-                searchDto.setSearchWord(searchDto.getSearchWord().substring(searchDto.getSearchWord().length() , -1));
-            }
-
-
-            if(searchDto.getSearchWord().endsWith(",")){
-
-                searchDto.setSearchWord(searchDto.getSearchWord().substring(searchDto.getSearchWord().length(), -1));
-            }
-            hashList = searchDto.getSearchWord().split(",");
-
-
-            searchDto.setOptionCnt(hashList.length);
-
-
-
-            for(int i = 0 ; i < hashList.length ; i++){
-                if(i == 0 ){
-                    searchDto.setOption(hashList[0]);
-                }else if(i == 1){
-                    searchDto.setOption1(hashList[1]);
-                }else if(i == 2){
-                    searchDto.setOption2(hashList[2]);
-                }
-
-            }
-
-
-
-
-
-        };
-
-
         Map returnMap = new HashMap();
 
-        Map returnSeachMap = new HashMap();
-
-        returnSeachMap = commonServiceImpl.search(searchDto);
+        Map returnSeachMap = commonServiceImpl.search(searchDto);
         returnMap.put("data" , returnSeachMap.get("searchData"));
         returnMap.put("totalCount" , returnSeachMap.get("totalCount"));
         returnMap.put("rowCount" , searchDto.getScrollIndex());
         returnMap.put("scrollIndex" , searchDto.getScrollIndex() + 6);
 
         return returnMap;
+    }
+
+    // Distinct (대분류, 중분류, 소분류) combinations + post counts, used by the frontend to
+    // derive all 3 category pill rows without hardcoding any category values.
+    @GetMapping("/categoryTree")
+    public List<boardCategoryCountDTO> boardCategoryTree() throws Exception {
+        return boardServiceImpl.boardCategoryTree();
     }
 
     @PostMapping("/view")

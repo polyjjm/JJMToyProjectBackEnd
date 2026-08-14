@@ -2,6 +2,7 @@ package com.example.demo.board;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 public interface boardService {
@@ -14,4 +15,6 @@ public interface boardService {
     void boardView(String board_no) throws Exception;
 
     void boardDelete(Integer board_no) throws  Exception;
+
+    List<boardCategoryCountDTO> boardCategoryTree() throws Exception;
 }

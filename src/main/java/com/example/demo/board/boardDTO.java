@@ -27,7 +27,16 @@ public class boardDTO {
     private List<fileSrcNameDTO> boardImgList;
     private List<fileSrcNameDTO> boardImgLegacyList;
     private String boardImgListText;
-    private String board_hashTag;
+    // 3-tier freeform category: 대분류(main) > 중분류(mid) > 소분류(sub).
+    // All three are user-entered free text, not picked from a fixed preset list -
+    // only the 3-level shape is fixed. Replaces the old comma-joined board_hashTag column.
+    private String board_categoryMain;
+    private String board_categoryMid;
+    private String board_categorySub;
     private String board_userName;
+    // Not a real column - populated by a correlated subquery in boardMapper.xml
+    // (COUNT of board_comment rows for this post) so the board list/search results
+    // can show a comment count without a separate round trip per post.
+    private Integer commentCount;
 
 }
