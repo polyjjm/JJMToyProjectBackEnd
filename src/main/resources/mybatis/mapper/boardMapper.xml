@@ -10,28 +10,28 @@
         FROM board LIMIT #{limitValue}, 6
     </select>
 
-    <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO">
-        INSERT INTO board (board_no, board_title,board_writer,board_userName, board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
-        VALUES(nextval('board_sequences') ,#{board_title} , #{board_writer} ,#{board_userName},
-               <choose>
-                   <when test="board_categoryMain != null">#{board_categoryMain}</when>
-                   <otherwise> NULL</otherwise>
-               </choose>
-                ,
-               <choose>
-                   <when test="board_categoryMid != null">#{board_categoryMid}</when>
-                   <otherwise> NULL</otherwise>
-               </choose>
-                ,
-               <choose>
-                   <when test="board_categorySub != null">#{board_categorySub}</when>
-                   <otherwise> NULL</otherwise>
-               </choose>
-                , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
-               <choose>
-                   <when test="boardImgListText != null ">#{boardImgListText}</when>
-                    <otherwise> null</otherwise>
-               </choose>
+    <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO" useGeneratedKeys="true" keyProperty="board_no">
+        INSERT INTO board (board_title,board_writer,board_userName, board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
+        VALUES(#{board_title} , #{board_writer} ,#{board_userName},
+        <choose>
+            <when test="board_categoryMain != null">#{board_categoryMain}</when>
+            <otherwise> NULL</otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="board_categoryMid != null">#{board_categoryMid}</when>
+            <otherwise> NULL</otherwise>
+        </choose>
+        ,
+        <choose>
+            <when test="board_categorySub != null">#{board_categorySub}</when>
+            <otherwise> NULL</otherwise>
+        </choose>
+        , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+        <choose>
+            <when test="boardImgListText != null ">#{boardImgListText}</when>
+            <otherwise> null</otherwise>
+        </choose>
         )
     </insert>
 
@@ -52,9 +52,9 @@
     -->
     <select id="boardSearch" resultType="com.example.demo.board.boardDTO" parameterType="com.example.demo.common.searchDTO">
         SELECT SQL_CALC_FOUND_ROWS board_no , board_title, board_writer, board_userName,
-               board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content ,
-               board_hit , board_like , board_hate , board_date ,board_imgList,
-               (SELECT COUNT(*) FROM board_comment c WHERE c.board_no = board.board_no) AS commentCount
+        board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content ,
+        board_hit , board_like , board_hate , board_date ,board_imgList,
+        (SELECT COUNT(*) FROM board_comment c WHERE c.board_no = board.board_no) AS commentCount
         FROM board
         <where>
             <if test="searchWord != null and searchWord != ''">
@@ -114,32 +114,32 @@
     </update>
 
     <update id="boardUpdate" parameterType="com.example.demo.board.boardDTO">
-    UPDATE board
-    SET
-    board_title = #{board_title},
-    board_changeThumbnail = #{board_changeThumbnail},
-    board_content = #{board_content},
-    board_categoryMain =
-    <choose>
-        <when test="board_categoryMain != null">#{board_categoryMain}</when>
-        <otherwise>NULL</otherwise>
-    </choose>,
-    board_categoryMid =
-    <choose>
-        <when test="board_categoryMid != null">#{board_categoryMid}</when>
-        <otherwise>NULL</otherwise>
-    </choose>,
-    board_categorySub =
-    <choose>
-        <when test="board_categorySub != null">#{board_categorySub}</when>
-        <otherwise>NULL</otherwise>
-    </choose>,
-    board_imgList =
-    <choose>
-        <when test="boardImgListText != null">#{boardImgListText}</when>
-        <otherwise>NULL</otherwise>
-    </choose>,
-    board_date = NOW()
-    WHERE board_no = #{board_no}
+        UPDATE board
+        SET
+        board_title = #{board_title},
+        board_changeThumbnail = #{board_changeThumbnail},
+        board_content = #{board_content},
+        board_categoryMain =
+        <choose>
+            <when test="board_categoryMain != null">#{board_categoryMain}</when>
+            <otherwise>NULL</otherwise>
+        </choose>,
+        board_categoryMid =
+        <choose>
+            <when test="board_categoryMid != null">#{board_categoryMid}</when>
+            <otherwise>NULL</otherwise>
+        </choose>,
+        board_categorySub =
+        <choose>
+            <when test="board_categorySub != null">#{board_categorySub}</when>
+            <otherwise>NULL</otherwise>
+        </choose>,
+        board_imgList =
+        <choose>
+            <when test="boardImgListText != null">#{boardImgListText}</when>
+            <otherwise>NULL</otherwise>
+        </choose>,
+        board_date = NOW()
+        WHERE board_no = #{board_no}
     </update>
 </mapper>

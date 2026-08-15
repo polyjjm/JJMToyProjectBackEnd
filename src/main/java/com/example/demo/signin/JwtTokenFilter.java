@@ -64,22 +64,23 @@ public class JwtTokenFilter extends GenericFilter {
             }
             chain.doFilter(request, response);
         } catch(ExpiredJwtException e){
-                e.printStackTrace();
-                httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-                httpServletResponse.setContentType("application/json");
-                httpServletResponse.setCharacterEncoding("UTF-8");
-                JSONObject obj = new JSONObject();
-
-                obj.put("message" , "토큰이 만료되었습니다");
-                obj.put("code" , "402");
-                String result = objectMapper.writeValueAsString(obj.toString());
-                httpServletResponse.getWriter().write(result);
+            // 이 필터는 permitAll인 경로(예: /board/comment/list 조회)에도 똑같이 실행된다.
+            // 예전에는 토큰이 만료됐다는 이유만으로 무조건 401을 반환했는데, 그러면
+            // "비로그인으로도 봐야 하는" 공개 API까지 "로그인은 했었지만 토큰이 오래된" 사용자한테
+            // 막혀버리는 문제가 있었다. 여기서는 인증 컨텍스트를 비워서 "비로그인 상태"로 취급하고
+            // 실제로 로그인이 필요한 경로였다면, 그건 뒤쪽의 authorizeHttpRequests가 알아서
+            // 401/403으로 막아준다 - 필터가 미리 판단해서 막을 필요가 없다.
+            e.printStackTrace();
+            SecurityContextHolder.clearContext();
+            chain.doFilter(request, response);
 
         } catch (Exception e ){
+            // 위와 같은 이유로: 토큰 형식이 이상하거나 서명 검증에 실패해도, 여기서 바로 401을
+            // 응답해버리지 않고 비로그인 상태로 넘긴다. permitAll 경로면 정상적으로 처리되고,
+            // 인증이 필요한 경로면 뒤쪽 필터체인에서 401/403으로 걸러진다.
             e.printStackTrace();
-            httpServletResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
-            httpServletResponse.setContentType("application/json");
-            httpServletResponse.getWriter().write("invalid token");
+            SecurityContextHolder.clearContext();
+            chain.doFilter(request, response);
         }
     }
 }
