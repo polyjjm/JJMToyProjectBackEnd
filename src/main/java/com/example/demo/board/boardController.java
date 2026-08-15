@@ -50,11 +50,12 @@ public class boardController {
         //이후 DB 저장
         boardServiceImpl.boardInsert(boardDto , files);
 
-        // 파일 업로드 호출
+        // post() (frontend) unwraps a top-level "data" key from every response (see common.tsx).
+        // This used to return an empty {} here (the line populating "data" was commented out),
+        // so the insert always succeeded in the DB but the frontend read the empty response as
+        // a failure and showed "게시글 등록에 실패했습니다" even though the row was saved.
         Map returnMap = new HashMap();
-        //boardPagingDTO returnboardPagingDTO;
-        //returnboardPagingDTO = boardServiceImpl.boardSelectList(boardPagingDTO.getCurrentPage());
-        //returnMap.put("data" , returnboardPagingDTO);
+        returnMap.put("data", true);
 
         logger.info(boardList.toString());
         return returnMap;
@@ -69,8 +70,9 @@ public class boardController {
         //이후 DB 저장
         boardServiceImpl.boardUdate(boardDto , files);
 
-        // 파일 업로드 호출
+        // 같은 이유로 (subMit 참고): data 키를 채워야 프론트가 성공으로 인식한다.
         Map returnMap = new HashMap();
+        returnMap.put("data", true);
 
         logger.info(boardList.toString());
         return returnMap;
