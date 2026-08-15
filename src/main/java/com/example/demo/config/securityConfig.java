@@ -77,7 +77,9 @@ public class securityConfig {
                 "http://3.36.127.136:8082",
                 "http://localhost:8082",
                 "http://3.36.127.136:8000",
-                "http://localhost:8000"
+                "http://localhost:8000",
+                "https://app.jjmlab.com",
+                "https://api.jjmlab.com"
         ));
         configuration.setAllowedMethods(Arrays.asList("*")); //모든 HTTP메서드 허용
         configuration.setAllowedHeaders(Arrays.asList("*")); //모든 헤더값 허용
