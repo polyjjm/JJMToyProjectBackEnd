@@ -1,9 +1,19 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.demo.chat.chatMessageMapper">
-    <insert id="insertMessage" parameterType="com.example.demo.chat.chatMessage">
-        INSERT INTO chat_message (room_id, sender_id, message, timestamp)
-        VALUES (#{roomId}, #{sender}, #{content}, NOW())
+    <!-- useGeneratedKeys is required here - the STOMP broadcast in chatController.sendMessage
+         returns this same `message` object back to every subscriber, and the frontend needs a
+         real id on it to know which of "my" messages have been read (see selectOthersMinLastRead
+         and chatRoom.tsx). Before this, message.id was always null on the live-broadcast path
+         (only messages re-fetched from selectMessagesByRoomId ever had a real id). -->
+    <insert id="insertMessage" parameterType="com.example.demo.chat.chatMessage" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO chat_message (room_id, sender_id, message, message_type, attachment_url, timestamp)
+        VALUES (#{roomId}, #{sender}, #{content},
+        <choose>
+            <when test="message_type != null and message_type != ''">#{message_type}</when>
+            <otherwise>'TEXT'</otherwise>
+        </choose>
+        , #{attachment_url}, NOW())
     </insert>
 
     <select id="selectMessagesByRoomId" resultType="com.example.demo.chat.chatMessage">
@@ -45,30 +55,85 @@
         HAVING COUNT(*) = 2
     </select>
 
+    <!--
+        Room list for the chat panel (see chat-mockup.html). Every per-room value is a
+        correlated subquery keyed off cr.room_id, matching this file's existing style rather
+        than restructuring into a derived-table join - at personal-site scale (a handful of
+        rooms, a handful of members) this is simple and fast enough.
+
+        unreadCount is computed against THIS request's own chat_room_member row (m, already
+        joined below) - m.last_read_message_id NULL means "never opened this room", so
+        COALESCE to 0 counts every message as unread, which is correct for a brand new member.
+        Also excludes cm.sender_id = #{userId} - without that, sending a message and not
+        immediately reopening that room's popup would count your own just-sent message as
+        unread for yourself. Same exclusion in selectTotalUnreadCount below, for the same reason.
+
+        opponentName only makes sense for 1:1 rooms (LIMIT 1 picks "the other member"; with
+        exactly 2 members that's unambiguous) - COALESCE falls back to the raw user_id because
+        guest chat participants (see NicknameInputPage.tsx) were never inserted into
+        member_user at all, only chat_room_member.
+    -->
     <select id="selectRoomsByUser" resultType="com.example.demo.chat.ChatRoomDto">
         SELECT
             cr.room_id,
             cr.is_group,
+            cr.room_name,
             (
                 SELECT message
                 FROM chat_message
                 WHERE room_id = cr.room_id
-                ORDER BY timestamp DESC
+                ORDER BY message_id DESC
                 LIMIT 1
                 ) AS lastMessage,
             (
-        SELECT timestamp
-        FROM chat_message
-        WHERE room_id = cr.room_id
-        ORDER BY timestamp DESC
-            LIMIT 1
-            ) AS lastMessageTime
+                SELECT timestamp
+                FROM chat_message
+                WHERE room_id = cr.room_id
+                ORDER BY message_id DESC
+                LIMIT 1
+                ) AS lastMessageTime,
+            (
+                SELECT message_type
+                FROM chat_message
+                WHERE room_id = cr.room_id
+                ORDER BY message_id DESC
+                LIMIT 1
+                ) AS messageType,
+            (
+                SELECT sender_id
+                FROM chat_message
+                WHERE room_id = cr.room_id
+                ORDER BY message_id DESC
+                LIMIT 1
+                ) AS lastMessageSenderId,
+            (
+                SELECT COUNT(*)
+                FROM chat_message cm
+                WHERE cm.room_id = cr.room_id
+                  AND cm.message_id > COALESCE(m.last_read_message_id, 0)
+                  AND cm.sender_id != #{userId}
+                ) AS unreadCount,
+            (
+                SELECT COALESCE(mu.user_name, crm2.user_id)
+                FROM chat_room_member crm2
+                LEFT JOIN member_user mu ON mu.user_id = crm2.user_id
+                WHERE crm2.room_id = cr.room_id
+                  AND crm2.user_id != #{userId}
+                LIMIT 1
+                ) AS opponentName,
+            (
+                SELECT COUNT(*)
+                FROM chat_room_member crm3
+                WHERE crm3.room_id = cr.room_id
+                ) AS memberCount
         FROM chat_room cr
             JOIN chat_room_member m ON cr.room_id = m.room_id
         WHERE m.user_id = #{userId}
         ORDER BY lastMessageTime DESC
     </select>
 
+    <!-- Superseded by last_read_message_id (see updateLastReadMessageId below) - left defined,
+         no longer called, same "leave it rather than tear it out" call as the is_read column. -->
     <update id="markMessagesAsRead">
         UPDATE chat_message
         SET is_read = TRUE
@@ -76,6 +141,58 @@
           AND sender_id != #{userId}
           AND is_read = FALSE
     </update>
+
+    <!-- Called when a member opens/views a room (see ChatRoomController.markRead) - advances
+         their read pointer to "everything in the room right now". -->
+    <update id="updateLastReadMessageId">
+        UPDATE chat_room_member
+        SET last_read_message_id = (SELECT MAX(message_id) FROM chat_message WHERE room_id = #{roomId})
+        WHERE room_id = #{roomId} AND user_id = #{userId}
+    </update>
+
+    <!-- Header bell badge: total unread across every room the user is in. Excludes the user's
+         own sent messages (sender_id != #{userId}) - otherwise sending a message and not
+         reopening that room's popup counts your own just-sent message as "unread" for you. -->
+    <select id="selectTotalUnreadCount" resultType="long">
+        SELECT COALESCE(SUM(
+            (SELECT COUNT(*) FROM chat_message cm
+             WHERE cm.room_id = crm.room_id AND cm.message_id > COALESCE(crm.last_read_message_id, 0)
+               AND cm.sender_id != #{userId})
+        ), 0)
+        FROM chat_room_member crm
+        WHERE crm.user_id = #{userId}
+    </select>
+
+    <!-- See chatMessageMapper.selectOthersMinLastRead's javadoc for the semantics. -->
+    <select id="selectOthersMinLastRead" resultType="long">
+        SELECT MIN(COALESCE(last_read_message_id, 0))
+        FROM chat_room_member
+        WHERE room_id = #{roomId} AND user_id != #{userId}
+    </select>
+
+    <!-- Single-room version of selectRoomsByUser's header-relevant fields, for the popup
+         conversation window's header (avatar/name) - see ChatRoomController.getRoomInfo. -->
+    <select id="selectRoomInfo" resultType="com.example.demo.chat.ChatRoomDto">
+        SELECT
+            cr.room_id,
+            cr.is_group,
+            cr.room_name,
+            (
+                SELECT COALESCE(mu.user_name, crm2.user_id)
+                FROM chat_room_member crm2
+                LEFT JOIN member_user mu ON mu.user_id = crm2.user_id
+                WHERE crm2.room_id = cr.room_id
+                  AND crm2.user_id != #{userId}
+                LIMIT 1
+                ) AS opponentName,
+            (
+                SELECT COUNT(*)
+                FROM chat_room_member crm3
+                WHERE crm3.room_id = cr.room_id
+                ) AS memberCount
+        FROM chat_room cr
+        WHERE cr.room_id = #{roomId}
+    </select>
 
 
     <select id="findGuestGroupRoomId" resultType="long">

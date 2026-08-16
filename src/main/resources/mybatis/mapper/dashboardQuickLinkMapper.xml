@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dashboard.dashboardQuickLinkMapper">
+    <select id="selectAll" resultType="com.example.demo.dashboard.dashboardQuickLinkDTO">
+        SELECT * FROM dashboard_quick_link ORDER BY sort_no ASC
+    </select>
+
+    <select id="selectMaxSortNo" resultType="int">
+        SELECT COALESCE(MAX(sort_no), 0) FROM dashboard_quick_link
+    </select>
+
+    <insert id="insert" parameterType="com.example.demo.dashboard.dashboardQuickLinkDTO" useGeneratedKeys="true" keyProperty="link_id">
+        INSERT INTO dashboard_quick_link (label, subtitle, url, icon, sort_no)
+        VALUES (#{label}, #{subtitle}, #{url},
+        <choose>
+            <when test="icon != null and icon != ''">#{icon}</when>
+            <otherwise>'🔗'</otherwise>
+        </choose>
+        , #{sort_no})
+    </insert>
+
+    <update id="update" parameterType="com.example.demo.dashboard.dashboardQuickLinkDTO">
+        UPDATE dashboard_quick_link
+        SET label = #{label}, subtitle = #{subtitle}, url = #{url}, icon = #{icon}
+        WHERE link_id = #{link_id}
+    </update>
+
+    <update id="updateSortNo">
+        UPDATE dashboard_quick_link SET sort_no = #{sort_no} WHERE link_id = #{link_id}
+    </update>
+
+    <delete id="delete">
+        DELETE FROM dashboard_quick_link WHERE link_id = #{link_id}
+    </delete>
+</mapper>

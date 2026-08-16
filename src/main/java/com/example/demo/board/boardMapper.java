@@ -24,6 +24,9 @@ public interface boardMapper {
 
     public Integer boardUpdate(boardDTO boardDto);
 
+    // Used by boardServiceImpl to verify the requester owns the post before update/delete.
+    public String selectAuthor(Integer board_no);
+
     // 대/중/소 카테고리의 모든 조합과 각 조합의 게시글 수 - 3단계 탭 UI를 프론트에서 파생시키는 데 쓰인다.
     public List<boardCategoryCountDTO> boardCategoryTree();
 }

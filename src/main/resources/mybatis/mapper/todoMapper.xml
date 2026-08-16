@@ -18,8 +18,13 @@
     </select>
     <!-- ✅ 할 일 추가 -->
     <insert id="insertTodo" parameterType="com.example.demo.todo.todoDTO">
-        INSERT INTO todo (id, text, completed, important, date, category, icon, user_id)
-        VALUES (#{id}, #{text}, #{completed}, #{important}, #{date}, #{category}, #{icon}, #{user_id})
+        INSERT INTO todo (id, text, completed, important, date, category, icon, priority, user_id)
+        VALUES (#{id}, #{text}, #{completed}, #{important}, #{date}, #{category}, #{icon},
+        <choose>
+            <when test="priority != null and priority != ''">#{priority}</when>
+            <otherwise>'LOW'</otherwise>
+        </choose>
+        , #{user_id})
     </insert>
 
     <!-- ✅ 할 일 수정 -->
@@ -31,6 +36,7 @@
             <if test="fields.important != null">important = #{fields.important},</if>
             <if test="fields.category != null">category = #{fields.category},</if>
             <if test="fields.icon != null">icon = #{fields.icon},</if>
+            <if test="fields.priority != null">priority = #{fields.priority},</if>
         </set>
         WHERE id = #{id}
     </update>

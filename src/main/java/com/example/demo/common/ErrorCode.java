@@ -11,7 +11,8 @@ public enum ErrorCode {
     REFRESH_TOKEN_NOT_MATCH("403","유효하지 않은 refresh token 입니다. 다시 로그인하세요."),
     MEMBER_PHONE_EXIST("404","이미 등록된 핸드폰 번호입니다."),
     LOGIN_REQUIRED("401","로그인이 필요합니다."),
-    COMMENT_FORBIDDEN("403","본인이 작성한 댓글만 삭제할 수 있습니다.");
+    COMMENT_FORBIDDEN("403","본인이 작성한 댓글만 삭제할 수 있습니다."),
+    BOARD_FORBIDDEN("403","본인이 작성한 게시글만 수정/삭제할 수 있습니다.");
 
     private final String errorMessage;
     private final String errorCode;

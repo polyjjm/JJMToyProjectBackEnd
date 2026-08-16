@@ -106,6 +106,11 @@ public class MemberController {
 
         Map<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("id", originalMember.getUser_id());
+        // "id" is the Kakao numeric id, not an email - the frontend used to store it under a
+        // key literally named 'user_email' and every email-shaped comparison (board/comment
+        // ownership) silently never matched. Returning the real email here lets the frontend
+        // keep both identities under their own, correctly-named localStorage keys.
+        loginInfo.put("email", originalMember.getUser_email());
         loginInfo.put("token", jwtToken);
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }

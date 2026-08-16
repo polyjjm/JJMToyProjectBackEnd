@@ -1,11 +1,11 @@
 package com.example.demo.chat;
 
+import com.example.demo.common.commonServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import java.security.Principal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -19,12 +19,19 @@ public class ChatRoomController {
     @Autowired
     private final chatMessageMapper chatMapper;
     private final ChatService chatService;
+    private final commonServiceImpl commonServiceImpl;
 
+    // Returns {data: roomId} (not a raw Long) so it's consistent with the frontend's post()
+    // helper, which unwraps a top-level "data" key from every response (see common.tsx) - the
+    // raw-Long shape this used to return worked only because the old caller (chatMain.tsx)
+    // never actually used the returned id; ChatPanel.tsx's create-room flow needs it to
+    // immediately open the new room's popup.
     @PostMapping("/createRoom")
-    public ResponseEntity<Long> createRoom(@RequestBody ChatRoomRequest request) {
+    public Map<String, Object> createRoom(@RequestBody ChatRoomRequest request) {
         Long roomId = chatService.createRoom(request.getMemberIds(), request.getIsGroup());
-        return ResponseEntity.ok(roomId);
-
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("data", roomId);
+        return returnMap;
     }
 
     @PostMapping("/rooms")
@@ -42,6 +49,26 @@ public class ChatRoomController {
 
         Map returnMap = new HashMap();
         returnMap.put("data" , roomId);
+        return returnMap;
+    }
+
+    // Header bell badge - total unread across every room the user is in.
+    @GetMapping("/unreadCount/{userId}")
+    public Map<String, Object> getUnreadCount(@PathVariable String userId) {
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("data", chatMapper.selectTotalUnreadCount(userId));
+        return returnMap;
+    }
+
+    // Image chat messages reuse the exact same upload (+ automatic thumbnail generation) as
+    // board images - see commonServiceImpl.ckEditorUpload. The frontend uploads the file here
+    // first, then publishes a normal STOMP chat.send message with messageType=IMAGE and this
+    // URL as attachmentUrl (see chatRoom.tsx).
+    @PostMapping("/uploadImage")
+    public Map<String, Object> uploadImage(MultipartFile[] upload) throws Exception {
+        List<String> urlList = commonServiceImpl.ckEditorUpload(upload);
+        Map<String, Object> returnMap = new HashMap<>();
+        returnMap.put("data", urlList.isEmpty() ? null : urlList.get(0));
         return returnMap;
     }
 }

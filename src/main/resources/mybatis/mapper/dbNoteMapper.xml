@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.dbnote.dbNoteMapper">
+
+    <!-- Projects -->
+    <select id="selectProjects" resultType="com.example.demo.dbnote.dbNoteProjectDTO">
+        SELECT * FROM db_note_project ORDER BY created_at DESC
+    </select>
+
+    <insert id="insertProject" parameterType="com.example.demo.dbnote.dbNoteProjectDTO" useGeneratedKeys="true" keyProperty="project_id">
+        INSERT INTO db_note_project (name) VALUES (#{name})
+    </insert>
+
+    <update id="updateProject" parameterType="com.example.demo.dbnote.dbNoteProjectDTO">
+        UPDATE db_note_project SET name = #{name} WHERE project_id = #{project_id}
+    </update>
+
+    <delete id="deleteProject">
+        DELETE FROM db_note_project WHERE project_id = #{project_id}
+    </delete>
+
+    <!-- Tables -->
+    <select id="selectTables" resultType="com.example.demo.dbnote.dbNoteTableDTO">
+        SELECT * FROM db_note_table WHERE project_id = #{project_id} ORDER BY name ASC
+    </select>
+
+    <select id="selectTable" resultType="com.example.demo.dbnote.dbNoteTableDTO">
+        SELECT * FROM db_note_table WHERE table_id = #{table_id}
+    </select>
+
+    <insert id="insertTable" parameterType="com.example.demo.dbnote.dbNoteTableDTO" useGeneratedKeys="true" keyProperty="table_id">
+        INSERT INTO db_note_table (project_id, name) VALUES (#{project_id}, #{name})
+    </insert>
+
+    <update id="updateTable" parameterType="com.example.demo.dbnote.dbNoteTableDTO">
+        UPDATE db_note_table SET name = #{name} WHERE table_id = #{table_id}
+    </update>
+
+    <!-- Called when the generate-code panel is opened - see dbNoteController.getGeneratedView. -->
+    <update id="touchLastGeneratedAt">
+        UPDATE db_note_table SET last_generated_at = NOW() WHERE table_id = #{table_id}
+    </update>
+
+    <delete id="deleteTable">
+        DELETE FROM db_note_table WHERE table_id = #{table_id}
+    </delete>
+
+    <!-- Columns -->
+    <select id="selectColumns" resultType="com.example.demo.dbnote.dbNoteColumnDTO">
+        SELECT * FROM db_note_column WHERE table_id = #{table_id} ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectMaxColumnSortNo" resultType="int">
+        SELECT COALESCE(MAX(sort_order), 0) FROM db_note_column WHERE table_id = #{table_id}
+    </select>
+
+    <insert id="insertColumn" parameterType="com.example.demo.dbnote.dbNoteColumnDTO" useGeneratedKeys="true" keyProperty="column_id">
+        INSERT INTO db_note_column
+            (table_id, name, sql_type, length, nullable, is_primary_key, default_value, note, sort_order)
+        VALUES
+            (#{table_id}, #{name}, #{sql_type}, #{length}, #{nullable}, #{is_primary_key}, #{default_value}, #{note}, #{sort_order})
+    </insert>
+
+    <update id="updateColumn" parameterType="com.example.demo.dbnote.dbNoteColumnDTO">
+        UPDATE db_note_column
+        SET name = #{name}, sql_type = #{sql_type}, length = #{length}, nullable = #{nullable},
+            is_primary_key = #{is_primary_key}, default_value = #{default_value}, note = #{note}
+        WHERE column_id = #{column_id}
+    </update>
+
+    <update id="updateColumnSortNo">
+        UPDATE db_note_column SET sort_order = #{sort_order} WHERE column_id = #{column_id}
+    </update>
+
+    <delete id="deleteColumn">
+        DELETE FROM db_note_column WHERE column_id = #{column_id}
+    </delete>
+
+</mapper>

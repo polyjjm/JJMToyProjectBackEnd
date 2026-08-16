@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.demo.customtable.customTableMapper">
+
+    <!-- Tables -->
+    <select id="selectTables" resultType="com.example.demo.customtable.customTableDTO">
+        SELECT * FROM custom_table WHERE user_id = #{user_id} ORDER BY created_at DESC
+    </select>
+
+    <select id="selectTable" resultType="com.example.demo.customtable.customTableDTO">
+        SELECT * FROM custom_table WHERE table_id = #{table_id}
+    </select>
+
+    <insert id="insertTable" parameterType="com.example.demo.customtable.customTableDTO" useGeneratedKeys="true" keyProperty="table_id">
+        INSERT INTO custom_table (name, user_id) VALUES (#{name}, #{user_id})
+    </insert>
+
+    <update id="updateTable" parameterType="com.example.demo.customtable.customTableDTO">
+        UPDATE custom_table SET name = #{name} WHERE table_id = #{table_id}
+    </update>
+
+    <delete id="deleteTable">
+        DELETE FROM custom_table WHERE table_id = #{table_id}
+    </delete>
+
+    <!-- Columns -->
+    <select id="selectColumns" resultType="com.example.demo.customtable.customTableColumnDTO">
+        SELECT * FROM custom_table_column WHERE table_id = #{table_id} ORDER BY sort_order ASC
+    </select>
+
+    <select id="selectMaxColumnSortNo" resultType="int">
+        SELECT COALESCE(MAX(sort_order), 0) FROM custom_table_column WHERE table_id = #{table_id}
+    </select>
+
+    <insert id="insertColumn" parameterType="com.example.demo.customtable.customTableColumnDTO" useGeneratedKeys="true" keyProperty="column_id">
+        INSERT INTO custom_table_column (table_id, name, type, options, sort_order)
+        VALUES (#{table_id}, #{name}, #{type}, #{options}, #{sort_order})
+    </insert>
+
+    <update id="updateColumn" parameterType="com.example.demo.customtable.customTableColumnDTO">
+        UPDATE custom_table_column
+        SET name = #{name}, type = #{type}, options = #{options}
+        WHERE column_id = #{column_id}
+    </update>
+
+    <update id="updateColumnSortNo">
+        UPDATE custom_table_column SET sort_order = #{sort_order} WHERE column_id = #{column_id}
+    </update>
+
+    <delete id="deleteColumn">
+        DELETE FROM custom_table_column WHERE column_id = #{column_id}
+    </delete>
+
+    <!-- Rows -->
+    <select id="selectRows" resultType="com.example.demo.customtable.customTableRowDTO">
+        SELECT * FROM custom_table_row WHERE table_id = #{table_id} ORDER BY sort_order ASC, row_id ASC
+    </select>
+
+    <insert id="insertRow" parameterType="com.example.demo.customtable.customTableRowDTO" useGeneratedKeys="true" keyProperty="row_id">
+        INSERT INTO custom_table_row (table_id, data, sort_order) VALUES (#{table_id}, #{data}, #{sort_order})
+    </insert>
+
+    <update id="updateRow" parameterType="com.example.demo.customtable.customTableRowDTO">
+        UPDATE custom_table_row SET data = #{data} WHERE row_id = #{row_id}
+    </update>
+
+    <delete id="deleteRow">
+        DELETE FROM custom_table_row WHERE row_id = #{row_id}
+    </delete>
+
+</mapper>

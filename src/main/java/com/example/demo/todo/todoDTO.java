@@ -15,5 +15,7 @@ public class todoDTO {
     private String date; // YYYY-MM-DD 형식
     private String category;
     private String icon;
+    // HIGH/MID/LOW - drives the dashboard todo widget's colored priority bar per item.
+    private String priority;
     private String user_id;
 }

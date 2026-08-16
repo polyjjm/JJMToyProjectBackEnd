@@ -44,6 +44,8 @@ public class AuthController {
         String jwtToken = jwtTokenProvider.createToken(returnUserDto.getUser_email(), returnUserDto.getRole().toString());
         Map<String, Object> loginInfo = new HashMap<>();
         loginInfo.put("id", returnUserDto.getUser_id());
+        // See MemberController.kakaoLogin for why this is returned separately from "id".
+        loginInfo.put("email", returnUserDto.getUser_email());
         loginInfo.put("token", jwtToken);
         return new ResponseEntity<>(loginInfo, HttpStatus.OK);
     }

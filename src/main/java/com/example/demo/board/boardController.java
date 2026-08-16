@@ -35,7 +35,7 @@ public class boardController {
         returnMap.put("data" , returnSeachMap.get("searchData"));
         returnMap.put("totalCount" , returnSeachMap.get("totalCount"));
         returnMap.put("rowCount" , searchDto.getScrollIndex());
-        returnMap.put("scrollIndex" ,searchDto.getScrollIndex()  + 6);
+        returnMap.put("scrollIndex" ,searchDto.getScrollIndex()  + 8);
 
         logger.info(boardList.toString());
         return returnMap;
@@ -100,7 +100,7 @@ public class boardController {
         returnMap.put("data" , returnSeachMap.get("searchData"));
         returnMap.put("totalCount" , returnSeachMap.get("totalCount"));
         returnMap.put("rowCount" , searchDto.getScrollIndex());
-        returnMap.put("scrollIndex" , searchDto.getScrollIndex() + 6);
+        returnMap.put("scrollIndex" , searchDto.getScrollIndex() + 8);
 
         return returnMap;
     }

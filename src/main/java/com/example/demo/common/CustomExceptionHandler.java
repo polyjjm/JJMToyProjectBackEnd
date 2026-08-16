@@ -23,7 +23,7 @@ public class CustomExceptionHandler {
         // the old binary "MEMBER_PHONE_EXIST vs everything else" check.
         HttpStatus status = switch (errorMessage) {
             case MEMBER_PHONE_EXIST -> HttpStatus.CONFLICT;
-            case COMMENT_FORBIDDEN -> HttpStatus.FORBIDDEN;
+            case COMMENT_FORBIDDEN, BOARD_FORBIDDEN -> HttpStatus.FORBIDDEN;
             default -> HttpStatus.UNAUTHORIZED;
         };
         return new ResponseEntity<>(resutMap, status);

@@ -49,7 +49,22 @@ public class securityConfig {
             .sessionManagement(s->s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 //                특정 url패턴에 대해서는 인증처리(Authentication객체생성) 제외
             .authorizeHttpRequests((auth) -> auth
-                    .requestMatchers( "/api/chat/joinGuestRoom", "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin","/member/kakao/doLogin/**" ,"/oauth2/**","/auth/**","/board/**").permitAll().anyRequest().authenticated())
+                    // /board/** used to be blanket permitAll, which meant board write endpoints
+                    // (subMit/update/delete) were reachable with no login at all - only the read
+                    // endpoints below are meant to be public. Everything else under /board/**
+                    // (subMit/update/delete, and comment insert/delete) now falls through to
+                    // anyRequest().authenticated().
+                    // /api/chat/roomInfo, /readStatus join /history in being permitAll - guest
+                    // chat participants (NicknameInputPage.tsx) have no JWT at all, only the
+                    // chosen nickname stored as their user_id, so these must stay reachable the
+                    // same way /api/chat/history already was. All 3 do their own isMemberOfRoom
+                    // check app-side (see chatController.java) instead of relying on Spring
+                    // Security's identity, since "identity" here can be an unauthenticated guest
+                    // nickname. /api/chat/rooms, /createRoom, /unreadCount, /uploadImage are
+                    // deliberately NOT here - guests never reach the room-list panel/bell at all
+                    // (see appShell.tsx), so those stay behind anyRequest().authenticated().
+                    .requestMatchers( "/api/chat/joinGuestRoom", "/api/chat/roomInfo/**", "/api/chat/readStatus/**", "/menu/**" ,"/ws-chat/**", "/api/chat/history/**","/member/google/doLogin", "/member/**","/member/kakao/doLogin","/member/kakao/doLogin/**" ,"/oauth2/**","/auth/**",
+                            "/board/select", "/board/boardSearch", "/board/categoryTree", "/board/view", "/board/comment/list").permitAll().anyRequest().authenticated())
 //                UsernamePasswordAuthenticationFilter 이 클래스에서 폼로그인 인증을 처리
             .addFilterBefore(jwtTokenFilter, UsernamePasswordAuthenticationFilter.class)
 //                oauth로그인이 성공했을경우 실행할 클래스 정의

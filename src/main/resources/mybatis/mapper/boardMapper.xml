@@ -7,11 +7,18 @@
                board_hit , board_like , board_hate , board_date ,board_imgList,
                (SELECT COUNT(*) FROM board_comment c WHERE c.board_no = board.board_no) AS commentCount,
                (SELECT count(*) FROM board) AS totalCount
-        FROM board LIMIT #{limitValue}, 6
+        FROM board LIMIT #{limitValue}, 8
     </select>
 
+    <!--
+        board_changeThumbnail is deliberately NOT written here anymore - the insert/update forms
+        no longer collect it (the card image is derived from board_imgList[0] instead, see
+        board.tsx), so every new post just leaves the column NULL. The column itself is kept
+        (not dropped) so older posts that already have a value keep showing it - see
+        board.types.ts's BoardFormState comment.
+    -->
     <insert id="boardInsert" parameterType="com.example.demo.board.boardDTO" useGeneratedKeys="true" keyProperty="board_no">
-        INSERT INTO board (board_title,board_writer,board_userName, board_categoryMain, board_categoryMid, board_categorySub, board_changeThumbnail, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
+        INSERT INTO board (board_title,board_writer,board_userName, board_categoryMain, board_categoryMid, board_categorySub, board_content,board_hit,board_like,board_hate,board_date ,board_datgleNo, board_imgList)
         VALUES(#{board_title} , #{board_writer} ,#{board_userName},
         <choose>
             <when test="board_categoryMain != null">#{board_categoryMain}</when>
@@ -27,7 +34,7 @@
             <when test="board_categorySub != null">#{board_categorySub}</when>
             <otherwise> NULL</otherwise>
         </choose>
-        , #{board_changeThumbnail} ,#{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
+        , #{board_content} ,0 ,0 ,0 ,NOW() ,0 ,
         <choose>
             <when test="boardImgListText != null ">#{boardImgListText}</when>
             <otherwise> null</otherwise>
@@ -38,6 +45,11 @@
     <delete id="boardDelete" parameterType="Integer">
         DELETE FROM board WHERE board_no = #{board_no}
     </delete>
+
+    <!-- Used by boardServiceImpl to verify the requester owns the post before update/delete. -->
+    <select id="selectAuthor" parameterType="Integer" resultType="String">
+        SELECT board_userName FROM board WHERE board_no = #{board_no}
+    </select>
 
     <!--
         게시글 검색/필터.
@@ -82,7 +94,7 @@
             </if>
         </where>
         <if test="scrollIndex != null">
-            LIMIT #{scrollIndex}, 6
+            LIMIT #{scrollIndex}, 8
         </if>
 
     </select>
@@ -117,7 +129,6 @@
         UPDATE board
         SET
         board_title = #{board_title},
-        board_changeThumbnail = #{board_changeThumbnail},
         board_content = #{board_content},
         board_categoryMain =
         <choose>
