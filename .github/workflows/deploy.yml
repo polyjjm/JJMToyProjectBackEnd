@@ -14,6 +14,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create application-prod.properties
+        run: |
+          cat << 'EOF' > src/main/resources/application-prod.properties
+          ${{ secrets.APPLICATION_PROD_PROPERTIES }}
+          EOF
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
